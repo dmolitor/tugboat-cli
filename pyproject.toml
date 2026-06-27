@@ -1,0 +1,19 @@
+[project]
+name = "tugboat-cli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Daniel Molitor", email = "molitdj97@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "tugboat-py>=0.1.2",
+]
+
+[project.scripts]
+tugboat-cli = "tugboat_cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.22,<0.10.0"]
+build-backend = "uv_build"

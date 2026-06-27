@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Claude stuff
+CLAUDE.md
+.claude/
+
+# Examples
+examples/cleaning_and_viz/*
+!examples/cleaning_and_viz/clean.py
+!examples/cleaning_and_viz/viz.R
+!examples/cleaning_and_viz/README.md
