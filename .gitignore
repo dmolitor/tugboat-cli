@@ -8,6 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+.env
 
 # Claude stuff
 CLAUDE.md
@@ -18,3 +19,6 @@ examples/cleaning_and_viz/*
 !examples/cleaning_and_viz/clean.py
 !examples/cleaning_and_viz/viz.R
 !examples/cleaning_and_viz/README.md
+!examples/cleaning_and_viz/dockerize.py
+*.csv
+.binder/
