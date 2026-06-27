@@ -1,6 +1,4 @@
-import tugboat
 from pathlib import Path
-import pyperclip
 from pygit2 import Repository
 import re
 from tugboat.binderize import _use_badge, BADGE_URL, DEFAULT_IMAGE

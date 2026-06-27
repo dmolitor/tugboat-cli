@@ -1,4 +1,3 @@
-from tugboat_cli.utils import _stop_if_r_not_installed
 from pathlib import Path
 import shutil
 import subprocess
@@ -101,7 +100,7 @@ def create(
 
     Parameters
     ----------
-    project : str, default current working directory
+    project : str | Path, default current working directory
         Path to the analysis directory to generate a Dockerfile from.
     FROM : str or None, default None
         Base Docker image to use in the generated Dockerfile's ``FROM``
@@ -125,7 +124,11 @@ def create(
     project = Path(project).resolve()
     if detect_python:
         # Scan for dependencies and generate requirements.txt
-        _generate(project_path=project, **pigar_kwargs)
+        _generate(
+            requirement_file=str(project / "requirements-tugboat.txt"),
+            project_path=project,
+            **pigar_kwargs
+        )
     if detect_r:
         # Scan for dependencies and generate renv.lock
         _r_lockfile_with_temp_libpath(project=project, **renv_kwargs)
