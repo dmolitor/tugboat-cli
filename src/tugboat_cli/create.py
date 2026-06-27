@@ -45,6 +45,9 @@ def _dockerfile(
     FROM: str | None = None,
     optimize_pak: bool = True,
 ) -> str:
+    """
+    Render a Dockerfile string for the given project configuration.
+    """
     if project_name is None:
         project_dir = f"/{Path(project).name}"
     else:
@@ -99,34 +102,55 @@ def create(
     """
     Generate a Dockerfile and .dockerignore from an analysis directory.
 
-    Scans `project` for Python dependencies using pigar, writes them to
-    a `requirements.txt` files, and generates a Dockerfile that copies the
-    analysis directory into the image and installs those dependencies with uv.
-    Since tugboat uses uv under the hood, it should be immediately compatible
-    with any project that is already set up to use uv.
+    Scans ``project`` for Python and/or R dependencies, writes a
+    ``requirements.txt`` (Python) and/or ``renv.lock`` (R), and
+    generates a Dockerfile that copies the project into the image and installs
+    all detected dependencies. Python dependencies are installed with ``uv``;
+    R dependencies are installed with ``pak`` and ``renv``.
 
     Parameters
     ----------
-    project : str | Path, default current working directory
+    project : str or Path, default current working directory
         Path to the analysis directory to generate a Dockerfile from.
-    FROM : str or None, default None
-        Base Docker image to use in the generated Dockerfile's ``FROM``
-        instruction. If None, defaults to ``rocker/r-ver:latest``.
+    FROM : str or None, default "rocker/r-ver:latest"
+        Base Docker image for the generated ``FROM`` instruction. Pass
+        ``None`` to auto-detect: R projects use
+        ``posit/r-base:{r_version}-noble``; Python-only projects default to
+        ``python:{py_version}-slim``.
     exclude : list of str, str, or None, default None
-        File(s) or sub-directorie(s) to exclude from the Docker image via
+        File(s) or sub-directories to exclude from the Docker image via
         the generated ``.dockerignore``.
     verbose : bool, default False
         Whether to print the generated Dockerfile contents.
-    **pigar_kwargs : Dict
-        A dictionary of keyword arguments forwarded to pigar's dependency-scanning
-        ``generate`` function (e.g. `dry_run`, `index_url`).
-    **renv_kwargs : Dict
-        A dictionary of keyword arguments forwarded to renv's dependency-scanning
-        ``generate`` function (e.g. `dry_run`, `index_url`).
+    detect_r : bool, default True
+        Whether to detect R dependencies and prepare the Docker image
+        accordingly. At least one of ``detect_r`` or ``detect_python``
+        must be True.
+    detect_python : bool, default True
+        Whether to detect Python dependencies and prepare the Docker image
+        accordingly. At least one of ``detect_r`` or ``detect_python``
+        must be True.
+    pigar_kwargs : dict, default {}
+        Keyword arguments forwarded to pigar's ``generate`` function
+        (e.g. ``{"dry_run": True, "index_url": "..."}``).
+    renv_kwargs : dict, default {}
+        Keyword arguments forwarded to ``tugboat:::init_renv()``, which
+        passes them on to ``renv::dependencies()``.
+    optimize_pak : bool, default True
+        When True, rewrites ``renv.lock`` to point at a Posit Package
+        Manager binary mirror before running ``renv::restore()``, which
+        substantially speeds up R package installation. Set to False if
+        you encounter R package installation errors as a first debugging
+        step.
 
     Returns
     -------
     None
+
+    Raises
+    ------
+    ValueError
+        If both ``detect_r`` and ``detect_python`` are False.
     """
     project = Path(project).resolve()
     if detect_python:

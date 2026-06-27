@@ -3,15 +3,14 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-from typing import List
 
 
 class DockerNotFoundError(Exception):
-    pass
+    """Raised when the ``docker`` CLI is not found on PATH."""
 
 
 class RNotFoundError(Exception):
-    pass
+    """Raised when ``Rscript`` is not found on PATH."""
 
 
 def _stop_if_docker_not_installed() -> None:
@@ -31,6 +30,14 @@ def _stop_if_r_not_installed() -> None:
 
 
 def _to_r_literal(value):
+    """
+    Convert a Python value to its R literal string representation.
+
+    Raises
+    ------
+    TypeError
+        If ``value`` is a type that cannot be converted.
+    """
     if value is None:
         return "NULL"
     if isinstance(value, bool):
@@ -53,7 +60,17 @@ def _to_r_literal(value):
     raise TypeError(f"Cannot convert {type(value).__name__} to an R literal.")
 
 
-def _r_lockfile_with_temp_libpath(project: str | Path, **renv_kwargs):
+def _r_lockfile_with_temp_libpath(project: str | Path, **renv_kwargs) -> None:
+    """
+    Generate an ``renv.lock`` for a project using an isolated R library.
+
+    Raises
+    ------
+    RNotFoundError
+        If ``Rscript`` is not found on PATH.
+    subprocess.CalledProcessError
+        If the underlying R process exits with a non-zero status.
+    """
     _stop_if_r_not_installed()
     project = Path(project).resolve()
     rscript = shutil.which("Rscript")

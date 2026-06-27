@@ -7,6 +7,9 @@ from tugboat.binderize import _use_badge, BADGE_URL, DEFAULT_IMAGE
 def _binder_dockerfile(
     detect_r: bool = True, detect_python: bool = True, optimize_pak: bool = True
 ) -> str:
+    """
+    Generate a Binder-compatible Dockerfile string.
+    """
     dock = f"""FROM {DEFAULT_IMAGE}""" + """
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --chown=${NB_USER} . /home/rstudio
@@ -79,6 +82,12 @@ def binderize(
     ----------
     project : Path or str, default Path(".")
         Path to the local Git repository to binderize. Must be a GitHub repository.
+    detect_r : bool, default True
+        Whether to detect R dependencies and prepare the Docker image accordingly.
+        One of (or both) `detect_r` or `detect_python` must be set to True.
+    detect_python : bool, default True
+        Whether to detect Python dependencies and prepare the Docker image accordingly.
+        One of (or both) `detect_r` or `detect_python` must be set to True.
     branch : str, default "main"
         Branch to point the Binder launch link at.
     urlpath : str, default "rstudio"
@@ -91,6 +100,11 @@ def binderize(
         Whether to overwrite an existing ``.binder/Dockerfile``.
     verbose : bool, default False
         Whether to print the generated Binder Dockerfile contents.
+    optimize_pak : bool, default True
+        Optimize R package installations in the Docker image. This should
+        generally work. However, in some rare cases it can cause errors to
+        occur. When encountering R package installation errors, setting this
+        to False is typically a good, first debugging step.
 
     Returns
     -------
@@ -118,7 +132,7 @@ def binderize(
     if not binder_dir.is_dir():
         binder_dir.mkdir()
     dockerfile_path = binder_dir / "Dockerfile"
-    if overwrite:
+    if overwrite or not dockerfile_path.exists():
         dockerfile_path.write_text(dock)
     # Construct Binder badge and insert into README (if possible)
     binder_url = f"https://mybinder.org/v2/gh/{'/'.join(username_repo)}/{branch}?urlpath={urlpath}"
