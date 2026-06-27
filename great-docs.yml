@@ -43,7 +43,7 @@ hero:
 # Logo & Favicon
 # ---------------
 # Point to a single logo file (replaces the text title in the navbar):
-# logo: assets/logo.svg
+logo: assets/tugboat-logo-py.png
 #
 # For light/dark variants:
 # logo:
