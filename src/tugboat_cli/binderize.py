@@ -3,10 +3,9 @@ from pygit2 import Repository
 import re
 from tugboat.binderize import _use_badge, BADGE_URL, DEFAULT_IMAGE
 
+
 def _binder_dockerfile(
-    detect_r: bool = True,
-    detect_python: bool = True,
-    optimize_pak: bool = True
+    detect_r: bool = True, detect_python: bool = True, optimize_pak: bool = True
 ) -> str:
     dock = f"""FROM {DEFAULT_IMAGE}""" + """
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -40,7 +39,10 @@ RUN for d in /usr/local/lib/R/etc /usr/lib/R/etc; do \\
 RUN R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform[['pkgType']], R.Version()[['os']], R.Version()[['arch']]))"
 """
         if optimize_pak:
-            dock = dock + """RUN R -e "dist <- pak::system_r_platform_data()[['distribution']]; rel <- pak::system_r_platform_data()[['release']]; binary_url <- subset(pak::ppm_platforms(), distribution == dist & release == rel)[['binary_url']][1]; cran_binary_url <- if (!is.na(binary_url)) { sprintf('%s/__linux__/%s/latest', pak::ppm_repo_url(), binary_url)  } else { NA }; if (!is.na(cran_binary_url)) { pak::repo_add(CRAN = cran_binary_url) }; pak::pkg_install('renv'); if (!is.na(cran_binary_url)) { lf <- renv::lockfile_modify(repos = c('CRAN' = cran_binary_url)); tryCatch({ renv::lockfile_write(lf, './renv.lock') }, error = function(e) { invisible(NULL) }) }" """
+            dock = (
+                dock
+                + """RUN R -e "dist <- pak::system_r_platform_data()[['distribution']]; rel <- pak::system_r_platform_data()[['release']]; binary_url <- subset(pak::ppm_platforms(), distribution == dist & release == rel)[['binary_url']][1]; cran_binary_url <- if (!is.na(binary_url)) { sprintf('%s/__linux__/%s/latest', pak::ppm_repo_url(), binary_url)  } else { NA }; if (!is.na(cran_binary_url)) { pak::repo_add(CRAN = cran_binary_url) }; pak::pkg_install('renv'); if (!is.na(cran_binary_url)) { lf <- renv::lockfile_modify(repos = c('CRAN' = cran_binary_url)); tryCatch({ renv::lockfile_write(lf, './renv.lock') }, error = function(e) { invisible(NULL) }) }" """
+            )
         else:
             dock = dock + "\nRUN R -e \"pak::pkg_install('renv')\""
         dock = dock + """RUN R -e "renv::restore()" """
@@ -64,7 +66,7 @@ def binderize(
     add_readme_badge: bool = True,
     overwrite: bool = True,
     verbose: bool = False,
-    optimize_pak: bool = True
+    optimize_pak: bool = True,
 ) -> None:
     """
     Prepare a GitHub repository to be launched via Binder.
@@ -108,9 +110,7 @@ def binderize(
         raise ValueError("Only GitHub repositories are currently supported.")
     # Generate Dockerfile
     dock = _binder_dockerfile(
-        detect_r=detect_r,
-        detect_python=detect_python,
-        optimize_pak=optimize_pak
+        detect_r=detect_r, detect_python=detect_python, optimize_pak=optimize_pak
     )
     if verbose:
         print(dock)

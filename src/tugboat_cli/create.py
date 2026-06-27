@@ -7,9 +7,11 @@ from typing import Dict, List
 
 from .utils import _r_lockfile_with_temp_libpath, _stop_if_r_not_installed
 
+
 def _default_python_image() -> str:
     py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
     return f"python:{py_version}-slim"
+
 
 def _default_r_image() -> str:
     _stop_if_r_not_installed()
@@ -19,7 +21,7 @@ def _default_r_image() -> str:
             rscript,
             "--vanilla",
             "-e",
-            'cat(as.character(getRversion()))',
+            "cat(as.character(getRversion()))",
         ],
         check=True,
         capture_output=True,
@@ -28,10 +30,12 @@ def _default_r_image() -> str:
     r_version = result.stdout.strip()
     return f"posit/r-base:{'.'.join(r_version.split('.')[0:2])}-noble"
 
+
 def _default_image(detect_r: bool) -> str:
     if detect_r:
         return _default_r_image()
     return _default_python_image()
+
 
 def _dockerfile(
     detect_r: bool,
@@ -39,7 +43,7 @@ def _dockerfile(
     project_name: str | None = None,
     project: str = str(Path(".").resolve()),
     FROM: str | None = None,
-    optimize_pak: bool = True
+    optimize_pak: bool = True,
 ) -> str:
     if project_name is None:
         project_dir = f"/{Path(project).name}"
@@ -66,7 +70,10 @@ RUN for d in /usr/local/lib/R/etc /usr/lib/R/etc; do \\
 RUN R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform[['pkgType']], R.Version()[['os']], R.Version()[['arch']]))"
 """
         if optimize_pak:
-            dock = dock + """RUN R -e "dist <- pak::system_r_platform_data()[['distribution']]; rel <- pak::system_r_platform_data()[['release']]; binary_url <- subset(pak::ppm_platforms(), distribution == dist & release == rel)[['binary_url']][1]; cran_binary_url <- if (!is.na(binary_url)) { sprintf('%s/__linux__/%s/latest', pak::ppm_repo_url(), binary_url)  } else { NA }; if (!is.na(cran_binary_url)) { pak::repo_add(CRAN = cran_binary_url) }; pak::pkg_install('renv'); if (!is.na(cran_binary_url)) { lf <- renv::lockfile_modify(repos = c('CRAN' = cran_binary_url)); tryCatch({ renv::lockfile_write(lf, './renv.lock') }, error = function(e) { invisible(NULL) }) }" """
+            dock = (
+                dock
+                + """RUN R -e "dist <- pak::system_r_platform_data()[['distribution']]; rel <- pak::system_r_platform_data()[['release']]; binary_url <- subset(pak::ppm_platforms(), distribution == dist & release == rel)[['binary_url']][1]; cran_binary_url <- if (!is.na(binary_url)) { sprintf('%s/__linux__/%s/latest', pak::ppm_repo_url(), binary_url)  } else { NA }; if (!is.na(cran_binary_url)) { pak::repo_add(CRAN = cran_binary_url) }; pak::pkg_install('renv'); if (!is.na(cran_binary_url)) { lf <- renv::lockfile_modify(repos = c('CRAN' = cran_binary_url)); tryCatch({ renv::lockfile_write(lf, './renv.lock') }, error = function(e) { invisible(NULL) }) }" """
+            )
         else:
             dock = dock + "\nRUN R -e \"pak::pkg_install('renv')\""
         dock = dock + """RUN R -e "renv::restore()" """
@@ -87,7 +94,7 @@ def create(
     detect_python: bool = True,
     pigar_kwargs: Dict = {},
     renv_kwargs: Dict = {},
-    optimize_pak: bool = True
+    optimize_pak: bool = True,
 ) -> None:
     """
     Generate a Dockerfile and .dockerignore from an analysis directory.
@@ -127,7 +134,7 @@ def create(
         _generate(
             requirement_file=str(project / "requirements-tugboat.txt"),
             project_path=project,
-            **pigar_kwargs
+            **pigar_kwargs,
         )
     if detect_r:
         # Scan for dependencies and generate renv.lock
@@ -142,7 +149,7 @@ def create(
         detect_python=detect_python,
         project=str(project),
         FROM=FROM,
-        optimize_pak=optimize_pak
+        optimize_pak=optimize_pak,
     )
     if verbose:
         print(dock)

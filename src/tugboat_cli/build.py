@@ -2,6 +2,7 @@ from pathlib import Path
 import tugboat
 from typing import List
 
+
 def build(
     dockerfile: str | Path = Path(".") / "Dockerfile",
     image_name: str = "tugboat",
@@ -65,5 +66,5 @@ def build(
         push=push,
         dh_username=dh_username,
         dh_password=dh_password,
-        verbose=verbose
+        verbose=verbose,
     )

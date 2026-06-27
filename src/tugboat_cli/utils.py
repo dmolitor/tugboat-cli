@@ -9,8 +9,10 @@ from typing import List
 class DockerNotFoundError(Exception):
     pass
 
+
 class RNotFoundError(Exception):
     pass
+
 
 def _stop_if_docker_not_installed() -> None:
     """Ensure Docker is available"""
@@ -19,12 +21,14 @@ def _stop_if_docker_not_installed() -> None:
             "Visit https://docs.docker.com/get-docker/ to get started!"
         )
 
+
 def _stop_if_r_not_installed() -> None:
     """Ensure R is available"""
     if not shutil.which("Rscript"):
         raise RNotFoundError(
             "Rscript command not found. Visit https://www.r-project.org/ to get started!"
         )
+
 
 def _to_r_literal(value):
     if value is None:
@@ -37,8 +41,7 @@ def _to_r_literal(value):
         value = str(value)
     if isinstance(value, str):
         value = (
-            value
-            .replace("\\", "\\\\")
+            value.replace("\\", "\\\\")
             .replace('"', '\\"')
             .replace("\n", "\\n")
             .replace("\r", "\\r")
@@ -47,20 +50,15 @@ def _to_r_literal(value):
     if isinstance(value, (list, tuple)):
         values = ", ".join(_to_r_literal(x) for x in value)
         return f"c({values})"
-    raise TypeError(
-        f"Cannot convert {type(value).__name__} to an R literal."
-    )
+    raise TypeError(f"Cannot convert {type(value).__name__} to an R literal.")
 
-def _r_lockfile_with_temp_libpath(
-    project: str | Path,
-    **renv_kwargs
-):
+
+def _r_lockfile_with_temp_libpath(project: str | Path, **renv_kwargs):
     _stop_if_r_not_installed()
     project = Path(project).resolve()
     rscript = shutil.which("Rscript")
     renv_args = ", ".join(
-        f"{key} = {_to_r_literal(value)}"
-        for key, value in renv_kwargs.items()
+        f"{key} = {_to_r_literal(value)}" for key, value in renv_kwargs.items()
     )
     r_code = f"""
 install.packages("pak", repos = sprintf(
