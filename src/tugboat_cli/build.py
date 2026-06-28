@@ -9,7 +9,7 @@ def build(
     tag: str = "latest",
     platforms: List[str] | str = ["linux/amd64", "linux/arm64"],
     build_args: List[str] | None = None,
-    build_context: str = str(Path(".").resolve()),
+    build_context: str | Path = Path("."),
     push: bool = False,
     dh_username: str | None = None,
     dh_password: str | None = None,
@@ -30,7 +30,7 @@ def build(
         One or more target platforms to build the image for.
     build_args : list of str or None, default None
         Additional arguments to pass through to ``docker buildx build``.
-    build_context : str, default current working directory
+    build_context : str or Path, default current working directory
         Path to the build context directory.
     push : bool, default False
         Whether to push the built image to DockerHub. If True, both
@@ -56,6 +56,7 @@ def build(
         If `push` is True but `dh_username` or `dh_password` is missing,
         if the Docker login fails, or if the build fails.
     """
+    build_context = str(Path(build_context).resolve())
     return tugboat.build(
         dockerfile=dockerfile,
         image_name=image_name,

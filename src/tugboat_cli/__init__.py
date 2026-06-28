@@ -12,6 +12,7 @@ Provides three public functions:
 """
 
 from .build import build
+from .cli import main
 from .create import create
 from .binderize import binderize
 
