@@ -31,7 +31,7 @@ check-uv:
 # Publish a package release on GitHub
 publish-github: check-uv check-github
   #!/usr/bin/env zsh
-  VERSION=$(uv run python -c "import tugboat; print(tugboat.__version__)")
+  VERSION=$(uv run python -c "import tugboat_cli; print(tugboat_cli.__version__)")
   if git ls-remote --tags origin | grep -q "refs/tags/v$VERSION"; then
     echo "Release v$VERSION already exists."
     exit 1
