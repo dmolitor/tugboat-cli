@@ -21,16 +21,19 @@ examples/cleaning_and_viz/*
 !examples/cleaning_and_viz/viz.R
 !examples/cleaning_and_viz/README.md
 !examples/cleaning_and_viz/dockerize.py
+!examples/cleaning_and_viz/dockerize.sh
 *.csv
 .binder/
 examples/diamond_pricing/*
 !examples/diamond_pricing/analyze.R
 !examples/diamond_pricing/README.md
 !examples/diamond_pricing/dockerize.py
+!examples/diamond_pricing/dockerize.sh
 examples/housing/*
 !examples/housing/analyze.py
 !examples/housing/README.md
 !examples/housing/dockerize.py
+!examples/housing/dockerize.sh
 # Great Docs build directory (ephemeral, do not commit)
 great-docs/
 
