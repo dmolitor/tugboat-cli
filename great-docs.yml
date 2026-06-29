@@ -30,7 +30,7 @@ display_name: tugboat
 # The large header area on the homepage with logo, name, and tagline.
 hero:
   enabled: true
-  tagline: "Quickly turn your Python/R analysis directory into a Docker image with minimal configuration."
+  tagline: "Turn your Python/R analysis directory into a Docker image with minimal configuration."
   # starfield: true
 
 # API Discovery Settings
@@ -98,7 +98,16 @@ reference:
 # Canonical address of the deployed documentation site.
 # Required for subdirectory deployments, skills page install commands,
 # .well-known/ discovery, and sitemaps.
-# site_url: "https://your-org.github.io/your-package/"
+site_url: "https://github.com/dmolitor/tugboat-cli/"
+
+# GitHub setup
+repo: https://github.com/dmolitor/tugboat-cli/
+github_style: icon # Can set as : icon | widget
+source:
+  enabled: true        # Enable/disable source links (default: true)
+  branch: main         # Git branch/tag to link to (default: auto-detect)
+  path: src/tugboat_cli    # Custom source path for monorepos (default: auto-detect)
+  placement: title     # Where to place the link: "usage" (default) or "title"
 
 # Site Settings
 # -------------
@@ -111,7 +120,7 @@ site:
 # Dark Mode Toggle
 # ----------------
 # Enable/disable the dark mode toggle in navbar (default: true)
-dark_mode_toggle: false
+dark_mode_toggle: true
 
 # Jupyter Kernel
 # --------------

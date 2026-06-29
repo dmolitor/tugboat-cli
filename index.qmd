@@ -1,14 +1,14 @@
-A simple Python package to generate a Dockerfile and corresponding Docker image
-from an analysis directory. tugboat also prepares your analysis repository to be
-shared via [Binder](https://mybinder.readthedocs.io/en/latest/index.html).
+Quickly containerize your Python and R (and hybrid) projects with minimal configuration.
+tugboat provides simple utilities to generate a Dockerfile from an analysis directory,
+build the corresponding Docker image, push the image to DockerHub, and publicly share
+the project via [Binder](https://mybinder.readthedocs.io/en/latest/index.html).
 
-tugboat uses the [pigar](https://github.com/damnever/pigar) package to automatically
-detect all the packages necessary to replicate your analysis and will generate
-a Dockerfile that contains an exact copy of your entire directory with all
-the essential Python packages installed. 
-tugboat uses [uv](https://docs.astral.sh/uv/) under the hood;
-as a result, projects that already utilize uv should be directly compatible with no
-additional setup.
+tugboat automatically detects all the packages necessary to replicate your analysis and
+will generate a Dockerfile that contains an exact copy of your analysis directory with all
+the essential Python/R packages installed. tugboat uses [uv](https://docs.astral.sh/uv/)
+and [renv](https://rstudio.github.io/renv/index.html) for Python and R dependency
+management, respectively. As a result, projects that already utilize uv or renv are
+tugboat compatible with no additional setup.
 
 tugboat may be of use, for example, when preparing a replication package for
 research. With tugboat, you can take a directory on your local computer
@@ -19,29 +19,29 @@ code and the necessary software to reproduce your findings.
 
 Install tugboat from PyPI:
 ```python
-pip install tugboat-py
+pip install tugboat-cli
 ```
 
 or install tugboat from GitHub:
 ```python
-pip install git+https://github.com/dmolitor/tugboat-py
+pip install git+https://github.com/dmolitor/tugboat-cli
 ```
 
 ## Usage
 
-tugboat has three primary functions; one to create a Dockerfile from your
+The tugboat CLI has three primary commands; one to create a Dockerfile from your
 analysis directory, one to build the corresponding Docker image, and one to make
 your project ready to share and run in an online, interactive compute environment
 via [Binder](https://mybinder.readthedocs.io/en/latest/index.html).
 
 ### Create the Dockerfile
 
-The primary function from tugboat is `create()`. This function converts 
+The primary command from tugboat is `create`. This command converts 
 your analysis directory into a Dockerfile that includes all your code 
 and essential Python packages.
 
-This function scans all files in the current analysis directory,
-attempts to detect all Python packages, and installs these packages in
+This command scans all files in the analysis directory,
+detects all Python/R packages, and installs these packages in
 the resulting Docker image. It also copies the entire contents of the
 analysis directory into the Docker image. For example, if
 your analysis directory is named `incredible_analysis`, the corresponding
@@ -49,64 +49,60 @@ location of your code and data files in the generated Docker image will
 be `/incredible_analysis`.
 
 For the most common use-cases, there are a couple of arguments in this
-function that are particularly important:
+command that are particularly important:
 
-- `project`: This argument tells tugboat which directory is the one to generate
-the Dockerfile from. You can set this value yourself, or you can just use
-the default value. By default, tugboat uses the working directory to
-determine the analysis directory.
-- `exclude`: A list of files or sub-directories in your analysis directory
+- `--exclude/-e`: A files or sub-directory in your analysis directory
 that should ***NOT*** be included in the Docker image. This is particularly
 important when you have, for example, a sub-directory with large data files
 that would make the resulting Docker image extremely large if included. You
 can tell tugboat to exclude this sub-directory and then simply mount it to
-a Docker container as needed.
+a Docker container as needed. This argument can be provided as many times
+as necessary.
+
+- `--from`: The base Docker image to build from. By default, tugboat will try
+to pick this intelligently. This allows the user to specify a base image that
+includes e.g. external software that is essential for the analysis, such as
+Stata.
 
 Below I'll outline a couple examples.
-```python
-from tugboat import create
-
+```bash
 # The simplest scenario where your analysis directory is your current
 # working directory, you are fine with the default base "python:3.x-slim"
 # Docker image, and you want to include all files/directories:
-create()
+tugboat create
 
 # Suppose your analysis directory is actually a sub-directory of your
 # main project directory:
-create(project="./sub-directory")
+tugboat create ./sub-directory
 
 # Suppose that you specifically need a Docker base image that has uv
 # installed. To do this, we will explicitly specify a different Docker
 # base image using the `FROM` argument.
-create(FROM="ghcr.io/astral-sh/uv:latest")
+tugboat create --from ghcr.io/astral-sh/uv:latest .
 
 # Finally, suppose that we want to include all files except a couple
 # particularly data-heavy sub-directories:
-create(exclude=["data/big_directory_1", "data/big_directory_2"])
+tugboat create -e data/big_directory_1 -e data/big_directory_2 .
 ```
 
 ### Build the Docker image
 
 Once the Dockerfile has been created, we can build the Docker image
-with the `build()` function. By default this will assume the Dockerfile
+with the `build` command. By default this will assume the Dockerfile
 is located in the current working directory. This function assumes a little knowledge
 about Docker; if you aren't sure where to start,
-[this is a great starting point](https://nsrc.org/workshops/2024/apricot-2024/virt/cloud-virt-ng/en/application-development/application-development.pdf).
+[this is a great starting point](https://www.educative.io/blog/an-introduction-to-docker-and-containers-for-beginners).
 
 The following example will do the simplest thing and will build the
 image locally.
-```python
-build(image_name="awesome_analysis")
+```bash
+tugboat build --image-name awesome_analysis
 ```
 
 Suppose that, like above, your analysis directory is a sub-directory of
 your main project directory:
-```python
-build(
-    dockerfile="./sub-directory",
-    build_context="./sub-directory",
-    image_name="awesome_analysis"
-)
+```bash
+tugboat build -d ./sub-directory/Dockerfile --build-context ./sub-directory -n awesome_analysis
 ```
 
 ### Push to DockerHub
@@ -114,50 +110,45 @@ build(
 If, instead of just building the Docker image locally, you want to build
 the image and then push to DockerHub, you can make a couple small additions
 to the code above:
-```python
-import os
-from dotenv import load_dotenv
-from tugboat import build
-
-load_dotenv()
-
-build(
-    dockerfile="./sub-directory",
-    build_context="./sub-directory",
-    image_name="awesome_analysis",
-    push=True,
-    dh_username=os.environ["DOCKERHUB_USERNAME"],
-    dh_password=os.environ["DOCKERHUB_USERNAME"]
-)
+```bash
+tugboat build \
+  -d ./sub-directory/Dockerfile \
+  --build-context ./sub-directory \
+  -n awesome_analysis \
+  --dh-username "$DH_USERNAME" \
+  --dh-password "$DH_PASSWORD" \
+  --push
 ```
 
 Note: If you choose to push, you also need to provide your DockerHub
 username and password. Typically you don't want to pass these in
 directly and should instead use environment variables (or a similar
-method) instead.
+method) instead. tugboat will automatically use the environment
+variables `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD` if they
+are available.
 
 ### Share your project via Binder
 
 Binder lets others instantly launch and interact with your project in a
 live, cloud-based environment with no local setup required. tugboat will
 prepare your project to be shared with Binder. The process is easy; simply
-prep your directory for Binder with the `binderize()` function:
+prep your directory for Binder with the `binderize` command:
 
 > [!NOTE]
 > Your analysis directory _must_ be a GitHub repository.
-``` python
-binderize(branch="main")
+``` bash
+binderize -b main ./
 ```
 By default this will add a Binder badge to your README.md file if it already has a section for badges:
 
-``` python
+``` bash
 Added badge to /.../README.md
 ```
 If your README file does _not_ have a section for badges, it will automatically
 save the badge to your clipboard and you will need to manually insert it
 into the README.
 
-``` python
+``` bash
 Add the following to your README.md file:
 
 <!-- badges: start -->
@@ -165,7 +156,7 @@ Add the following to your README.md file:
 <!-- badges: end -->
 ```
 
-After running `binderize()` you will see the following message:
+After running `tugboat binderize` you will see the following message:
 ```
 Your repository has been configured for Binder.
 [x] Commit and push all changes
@@ -177,6 +168,42 @@ otherwise it will likely fail. Binder can automatically detect changes
 to the repository and will rebuild as necessary, ensuring that the Binder
 repository stays up to date.
 
-## R package
+## Usage - Python package
 
-This package has a sibling [R package](https://github.com/dmolitor/tugboat)!
+tugboat is equally easy to use programmatically via the package interface.
+The following code translates the CLI usage above into the equivalent
+Python code.
+```python
+from dotenv import load_dotenv
+from tugboat_cli import binderize, build, create
+import os
+
+load_dotenv()
+
+# Create the Dockerfile
+create(
+    project=".",
+    exclude=["data/big_directory_1", "data/big_directory_2"]
+)
+
+# Build the image
+build(
+    image_name="awesome_analysis",
+    push=True,
+    dh_username=os.env["DH_USERNAME"],
+    dh_password=os.env["DH_PASSWORD"]
+)
+
+# Prep for sharing on Binder
+binderize(branch="main")
+```
+
+## Examples
+
+For some very simple worked examples, see the `examples/` directory.
+
+## Python and R packages
+
+tugboat is built on Python- and R- specific packages that are available at
+[tugboat-py](https://github.com/dmolitor/tugboat-py) and [tugboat](https://github.com/dmolitor/tugboat),
+respectively.
