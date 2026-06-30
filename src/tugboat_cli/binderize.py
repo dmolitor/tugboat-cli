@@ -48,7 +48,7 @@ RUN R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak
             )
         else:
             dock = dock + "\nRUN R -e \"pak::pkg_install('renv')\""
-        dock = dock + """RUN R -e "renv::restore()" """
+        dock = dock + """\nRUN R -e "renv::restore()" """
     dock = dock + "\nUSER ${NB_USER}"
     if detect_python:
         dock = dock + """
