@@ -23,12 +23,11 @@ def main():
 @click.option(
     "--from",
     "from_image",
-    default="rocker/r-ver:latest",
-    show_default=True,
+    default=None,
     help=(
         "Base image for the Docker image. "
-        "Pass an empty string to auto-detect: R projects use "
-        "posit/r-base:{version}-noble; Python projects use python:{version}-slim."
+        "Defaults to auto-detect: R projects use "
+        "posit/r-base:{version}-noble; Python-only projects use python:{version}-slim."
     ),
 )
 @click.option(
@@ -75,7 +74,7 @@ def create_cmd(
     """
     _create(
         project=project,
-        FROM=from_image or None,
+        FROM=from_image,
         exclude=list(exclude) or None,
         verbose=verbose,
         detect_r=detect_r,
