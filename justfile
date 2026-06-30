@@ -57,5 +57,5 @@ preview-docs:
   uv run great-docs preview
 
 # Run tests with PyTest
-# test *TEST_ARGS: check-uv
-#   uv run pytest {{TEST_ARGS}}
+test *TEST_ARGS: check-uv
+  uv run pytest {{TEST_ARGS}}
