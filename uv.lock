@@ -2482,7 +2482,7 @@ wheels = [
 
 [[package]]
 name = "tugboat-cli"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -2501,7 +2501,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.0" },
-    { name = "tugboat-py", specifier = ">=0.1.3" },
+    { name = "tugboat-py", specifier = ">=0.1.4" },
 ]
 
 [package.metadata.requires-dev]
@@ -2515,7 +2515,7 @@ dev = [
 
 [[package]]
 name = "tugboat-py"
-version = "0.1.3"
+version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "great-docs" },
@@ -2524,9 +2524,9 @@ dependencies = [
     { name = "pyperclip" },
     { name = "python-dotenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/e9/6f4de2e23aa37bffad996b4d3b6422f5a0cfa23d33d17b2f7a3d5f69db35/tugboat_py-0.1.3.tar.gz", hash = "sha256:91796a47b0e035828a8c46a8e3bce3f3300fd7df4a4d33ab411086788260f20b", size = 8094, upload-time = "2026-06-27T00:55:27.381Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/36/a761be2569f9032a61de2d0b596117a451d2b64138ec7b3ae9eb67af8a03/tugboat_py-0.1.4.tar.gz", hash = "sha256:3e20b049f05dd3ef654eb934e5de5f91d0ef13903679ab97bb7dfe4233c43734", size = 8098, upload-time = "2026-08-31T22:36:08.512Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c8/87/37d07006fd1325afdc6b0ff60becea4e561bd51dba5862db043c285d55e1/tugboat_py-0.1.3-py3-none-any.whl", hash = "sha256:44d20062e0c42e58a591ea3c22b566f3568c8968452b771236b7d235f9c20583", size = 10333, upload-time = "2026-06-27T00:55:26.327Z" },
+    { url = "https://files.pythonhosted.org/packages/09/76/6cec70148f857e21deb2fa47f0edec874e341c5ab0965e4052c61aa2fe52/tugboat_py-0.1.4-py3-none-any.whl", hash = "sha256:daa44332da4816dd2cd4fa8b882e5d58c212bce2b7352cc10e275c96a5386025", size = 10334, upload-time = "2026-08-31T22:36:07.734Z" },
 ]
 
 [[package]]
